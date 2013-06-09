@@ -1,8 +1,7 @@
-import re
-
 TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
+RE_ID = Regex('(?<=id=)[0-9]+')
 
 ITEMS_PER_PAGE = 10
 
@@ -167,7 +166,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
 
 		# Extract video ID
 		videoURL = item.xpath("./@href")[0]
-		m        = re.search('(?<=id=)[0-9]+', videoURL)
+		m        = RE_ID.search(videoURL)
 		videoID  = m.group(0)
 			
 		# Fetch JSON details(primarily to get URL of video object)
