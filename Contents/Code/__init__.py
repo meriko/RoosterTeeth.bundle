@@ -150,9 +150,8 @@ def Seasons(title, base_url, url, thumb):
 ##########################################################################################
 @route("/video/roosterteeth/Videos", offset = int)
 def Videos(title, base_url, url, thumb, offset = 0):
-	dir            = ObjectContainer()
-	dir.view_group = "InfoList"
-		
+	oc = ObjectContainer(view_group = "InfoList")
+
 	pageElement = HTML.ElementFromURL(base_url + url)
 	
 	counter = 0
@@ -189,7 +188,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
 		except:
 			video["desc"] = None
 			
-		dir.add(
+		oc.add(
 			EpisodeObject(
 				url = video["url"],
 				title = video["name"],
@@ -201,7 +200,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
 		counter = counter + 1
 		
 		if counter - offset >= ITEMS_PER_PAGE:
-			dir.add(
+			oc.add(
 				NextPageObject(
 					key = Callback(
 						Videos, 
@@ -212,14 +211,14 @@ def Videos(title, base_url, url, thumb, offset = 0):
 							offset = offset + ITEMS_PER_PAGE), 
 							title = "More ...")
 				)
-			return dir
+			return oc
 		
 	if pageElement.xpath("//*[contains(@class, 'streamLoadMore')]") != []:
 		for item in pageElement.xpath("//*[contains(@class, 'streamLoadMore')]"):
 			if 'next' in item.xpath("./text()")[0].lower():
 				nextPageUrl = item.xpath("./@href")[0]
 		
-				if len(dir) < 1:
+				if len(oc) < 1:
 					return Videos( 
 						title = title,
 						base_url = base_url, 
@@ -228,7 +227,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
 						offset = 0
 					) 
 				else:
-					dir.add(
+					oc.add(
 						NextPageObject(
 							key = Callback(
 								Videos, 
@@ -239,6 +238,5 @@ def Videos(title, base_url, url, thumb, offset = 0):
 									offset = 0), 
 									title = "More ...")
 					)
-		
-	return dir
 
+	return oc
