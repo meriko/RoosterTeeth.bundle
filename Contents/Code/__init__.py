@@ -42,7 +42,7 @@ def Start():
 	HTTP.Headers['User-agent'] = HTTP_USER_AGENT
 
 ##########################################################################################
-@handler('/video/roosterteeth', TITLE, thumb = ICON)
+@handler('/video/roosterteeth', TITLE, thumb = ICON, art = ART)
 def MainMenu():
 	menu = ObjectContainer()
 	
