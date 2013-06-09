@@ -1,8 +1,7 @@
-import re
-
 TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
+RE_ID = Regex('(?<=id=)[0-9]+')
 
 ITEMS_PER_PAGE = 10
 
@@ -43,9 +42,9 @@ def Start():
 	HTTP.Headers['User-agent'] = HTTP_USER_AGENT
 
 ##########################################################################################
-@handler('/video/roosterteeth', TITLE, thumb = ICON)
+@handler('/video/roosterteeth', TITLE, thumb = ICON, art = ART)
 def MainMenu():
-	menu = ObjectContainer(title1 = TITLE)
+	menu = ObjectContainer()
 	
 	# Add all channels
 	for channel in CHANNELS:
@@ -67,7 +66,7 @@ def MainMenu():
 ##########################################################################################
 @route("/video/roosterteeth/Shows")
 def Shows(title, url, thumb):
-	oc = ObjectContainer(title1 = title)
+	oc = ObjectContainer()
 	
 	# Add shows by parsing the site
 	shows       = []
@@ -114,7 +113,7 @@ def Shows(title, url, thumb):
 ##########################################################################################
 @route("/video/roosterteeth/Seasons")
 def Seasons(title, base_url, url, thumb):
-	oc = ObjectContainer(title1 = title)
+	oc = ObjectContainer()
 	
 	pageElement = HTML.ElementFromURL(base_url + url)
 	
@@ -151,9 +150,8 @@ def Seasons(title, base_url, url, thumb):
 ##########################################################################################
 @route("/video/roosterteeth/Videos", offset = int)
 def Videos(title, base_url, url, thumb, offset = 0):
-	dir            = ObjectContainer(title1 = title)
-	dir.view_group = "InfoList"
-		
+	oc = ObjectContainer(view_group = "InfoList")
+
 	pageElement = HTML.ElementFromURL(base_url + url)
 	
 	counter = 0
@@ -167,7 +165,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
 
 		# Extract video ID
 		videoURL = item.xpath("./@href")[0]
-		m        = re.search('(?<=id=)[0-9]+', videoURL)
+		m        = RE_ID.search(videoURL)
 		videoID  = m.group(0)
 			
 		# Fetch JSON details(primarily to get URL of video object)
@@ -190,7 +188,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
 		except:
 			video["desc"] = None
 			
-		dir.add(
+		oc.add(
 			EpisodeObject(
 				url = video["url"],
 				title = video["name"],
@@ -202,7 +200,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
 		counter = counter + 1
 		
 		if counter - offset >= ITEMS_PER_PAGE:
-			dir.add(
+			oc.add(
 				NextPageObject(
 					key = Callback(
 						Videos, 
@@ -213,14 +211,14 @@ def Videos(title, base_url, url, thumb, offset = 0):
 							offset = offset + ITEMS_PER_PAGE), 
 							title = "More ...")
 				)
-			return dir
+			return oc
 		
 	if pageElement.xpath("//*[contains(@class, 'streamLoadMore')]") != []:
 		for item in pageElement.xpath("//*[contains(@class, 'streamLoadMore')]"):
 			if 'next' in item.xpath("./text()")[0].lower():
 				nextPageUrl = item.xpath("./@href")[0]
 		
-				if len(dir) < 1:
+				if len(oc) < 1:
 					return Videos( 
 						title = title,
 						base_url = base_url, 
@@ -229,7 +227,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
 						offset = 0
 					) 
 				else:
-					dir.add(
+					oc.add(
 						NextPageObject(
 							key = Callback(
 								Videos, 
@@ -240,6 +238,5 @@ def Videos(title, base_url, url, thumb, offset = 0):
 									offset = 0), 
 									title = "More ...")
 					)
-		
-	return dir
 
+	return oc
