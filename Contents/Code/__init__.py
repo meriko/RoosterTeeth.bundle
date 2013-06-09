@@ -44,7 +44,7 @@ def Start():
 ##########################################################################################
 @handler('/video/roosterteeth', TITLE, thumb = ICON)
 def MainMenu():
-	menu = ObjectContainer(title1 = TITLE)
+	menu = ObjectContainer()
 	
 	# Add all channels
 	for channel in CHANNELS:
@@ -66,7 +66,7 @@ def MainMenu():
 ##########################################################################################
 @route("/video/roosterteeth/Shows")
 def Shows(title, url, thumb):
-	oc = ObjectContainer(title1 = title)
+	oc = ObjectContainer()
 	
 	# Add shows by parsing the site
 	shows       = []
@@ -113,7 +113,7 @@ def Shows(title, url, thumb):
 ##########################################################################################
 @route("/video/roosterteeth/Seasons")
 def Seasons(title, base_url, url, thumb):
-	oc = ObjectContainer(title1 = title)
+	oc = ObjectContainer()
 	
 	pageElement = HTML.ElementFromURL(base_url + url)
 	
@@ -150,7 +150,7 @@ def Seasons(title, base_url, url, thumb):
 ##########################################################################################
 @route("/video/roosterteeth/Videos", offset = int)
 def Videos(title, base_url, url, thumb, offset = 0):
-	dir            = ObjectContainer(title1 = title)
+	dir            = ObjectContainer()
 	dir.view_group = "InfoList"
 		
 	pageElement = HTML.ElementFromURL(base_url + url)
