@@ -210,33 +210,33 @@ def Videos(title, base_url, url, thumb, offset = 0):
 							thumb = thumb,
 							offset = offset + ITEMS_PER_PAGE), 
 							title = "More ...")
-				)
+			)
 			return oc
 		
-	if pageElement.xpath("//*[contains(@class, 'streamLoadMore')]") != []:
-		for item in pageElement.xpath("//*[contains(@class, 'streamLoadMore')]"):
-			if 'next' in item.xpath("./text()")[0].lower():
-				nextPageUrl = item.xpath("./@href")[0]
-		
-				if len(oc) < 1:
-					return Videos( 
-						title = title,
-						base_url = base_url, 
-						url = nextPageUrl, 
-						thumb = thumb,
-						offset = 0
-					) 
-				else:
-					oc.add(
-						NextPageObject(
-							key = Callback(
-								Videos, 
-									title = title, 
-									base_url = base_url, 
-									url = nextPageUrl,
-									thumb = thumb,
-									offset = 0), 
-									title = "More ...")
-					)
+	for item in pageElement.xpath("//*[contains(@class, 'streamLoadMore')]"):
+		if 'next' in item.xpath("./text()")[0].lower():
+			nextPageUrl = item.xpath("./@href")[0]
+	
+			if len(oc) < 1:
+				return Videos( 
+					title = title,
+					base_url = base_url, 
+					url = nextPageUrl, 
+					thumb = thumb,
+					offset = 0
+				) 
+			else:
+				oc.add(
+					NextPageObject(
+						key = Callback(
+							Videos, 
+								title = title, 
+								base_url = base_url, 
+								url = nextPageUrl,
+								thumb = thumb,
+								offset = 0), 
+								title = "More ...")
+				)
+				break
 
 	return oc
