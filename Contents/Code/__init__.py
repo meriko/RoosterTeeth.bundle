@@ -1,11 +1,18 @@
+import urllib
+import urllib2
+
 TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
-RE_ID = Regex('(?<=id=)[0-9]+')
+
+RE_ID              = Regex('(?<=id=)[0-9]+')
+RE_MATH_EXPRESSION = Regex('a\.val\(([0-9]+)\+([0-9]+)\*([0-9]+)\);')
 
 ITEMS_PER_PAGE = 10
 
-HTTP_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/536.26.17 (KHTML, like Gecko) Version/6.0.2 Safari/536.26.17"
+BASE_URL = "http://roosterteeth.com"
+
+HTTP_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/536.30.1 (KHTML, like Gecko) Version/6.0.5 Safari/536.30.1"
 
 CHANNELS = [ 
 	{
@@ -24,26 +31,77 @@ CHANNELS = [
 
 ##########################################################################################
 def Start():
-	Plugin.AddViewGroup("List", viewMode = "List", mediaType = "items")
-	Plugin.AddViewGroup("InfoList", viewMode = "InfoList", mediaType = "items")
-
 	# Setup the default attributes for the ObjectContainer
 	ObjectContainer.title1     = TITLE
-	ObjectContainer.view_group = "List"
 	ObjectContainer.art        = R(ART)
-
-	# Setup the default attributes for the other objects
-	DirectoryObject.thumb = R(ICON)
-	DirectoryObject.art   = R(ART)
-	VideoClipObject.thumb = R(ICON)
-	VideoClipObject.art   = R(ART)
 
 	HTTP.CacheTime             = CACHE_1HOUR
 	HTTP.Headers['User-agent'] = HTTP_USER_AGENT
 
 ##########################################################################################
+class NoRedirect(urllib2.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+		HTTP.Headers['Cookie'] = hdrs['Set-Cookie']
+
+def UpdateCookiesForAuthentication(url):
+	try:
+		req = urllib2.Request(url)
+		req.add_header('User-Agent', HTTP_USER_AGENT)
+		
+		resp     = urllib2.urlopen(req)
+		contents = resp.read()
+	
+	except urllib2.HTTPError, error:
+		contents = error.read()
+		
+		if 'Set-Cookie' in error.info():
+			HTTP.Headers['Cookie'] = error.info()['Set-Cookie']
+			
+		pageElement = HTML.ElementFromString(contents)
+		
+		postData = {}
+		for item in pageElement.xpath("//*[@id = 'ChallengeForm']//input"):
+			name = item.xpath("./@name")[0]
+			if name in ['act', 'jschl_vc']:
+				value          = item.xpath("./@value")[0]
+				postData[name] = value
+
+		for script in pageElement.xpath("//script[@type = 'text/javascript']"):			
+			if script.xpath("./text()") != []:
+				result = RE_MATH_EXPRESSION.search(script.xpath("./text()")[0]).groups()
+				if len(result) > 0:
+					answer = int(result[0]) + (int(result[1]) * int(result[2])) + 16
+					postData['jschl_answer'] = str(answer)
+				
+		postURL = pageElement.xpath("//*[@id = 'ChallengeForm']/@action")[0]
+
+		Thread.Sleep(5.850)
+
+		try:
+			noredir_opener = urllib2.build_opener(NoRedirect())
+			urllib2.install_opener(noredir_opener)
+		
+			req = urllib2.Request(url)
+			req.add_header('User-Agent', HTTP_USER_AGENT)
+			req.add_header('Cookie', HTTP.Headers['Cookie'])
+			req.add_header('Origin', url)
+			req.add_header('Referer', url)
+			req.add_header('Cache-Control', 'max-age=0')
+			req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+					
+			data = "act=" + postData['act'] + "&jschl_vc=" + postData['jschl_vc'] + "&jschl_answer=" + postData['jschl_answer']
+			resp = urllib2.urlopen(req, data = data)
+			
+			HTTP.Headers['Cookie'] = resp.info()['Set-Cookie']
+
+		except urllib2.HTTPError, error:
+			HTTP.Headers['Cookie'] = error.info()['Set-Cookie']
+	
+##########################################################################################
 @handler('/video/roosterteeth', TITLE, thumb = ICON, art = ART)
 def MainMenu():
+	UpdateCookiesForAuthentication(BASE_URL)
+
 	menu = ObjectContainer()
 	
 	# Add all channels
@@ -73,9 +131,8 @@ def Shows(title, url, thumb):
 	showNames   = []
 	pageElement = HTML.ElementFromURL(url + '/archive/series.php')
 
-	for item in pageElement.xpath("//*[contains(@id, 'Series')]//a"):
+	for item in pageElement.xpath("//*[@id = 'seriesBoxTdTable']//a"):
 		show = {}
-		
 		try:
 			show["url"]  = item.xpath("./@href")[0]
 			show["img"]  = item.xpath("./img/@src")[0]
@@ -150,7 +207,7 @@ def Seasons(title, base_url, url, thumb):
 ##########################################################################################
 @route("/video/roosterteeth/Videos", offset = int)
 def Videos(title, base_url, url, thumb, offset = 0):
-	oc = ObjectContainer(view_group = "InfoList")
+	oc = ObjectContainer()
 
 	pageElement = HTML.ElementFromURL(base_url + url)
 	
