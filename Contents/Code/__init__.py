@@ -1,6 +1,3 @@
-import urllib
-import urllib2
-
 TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
@@ -39,29 +36,31 @@ def Start():
 	HTTP.Headers['User-agent'] = HTTP_USER_AGENT
 
 ##########################################################################################
-class NoRedirect(urllib2.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, hdrs, newurl):
-		HTTP.Headers['Cookie'] = hdrs['Set-Cookie']
-
 def UpdateCookiesForAuthentication(url):
+	needsUpdate = False
+
 	try:
-		req = urllib2.Request(url)
-		req.add_header('User-Agent', HTTP_USER_AGENT)
+		req     = HTTP.Request(url)
+		content = req.content
+		headers = req.headers
 		
-		resp     = urllib2.urlopen(req)
-		contents = resp.read()
+	except Ex.HTTPError, e:
+		needsUpdate = True
+		content     = e.content
+		headers     = e.headers
 	
-	except urllib2.HTTPError, error:
-		contents = error.read()
-		
-		if 'Set-Cookie' in error.info():
-			HTTP.Headers['Cookie'] = error.info()['Set-Cookie']
+	if needsUpdate:
+		cookies = {}
+		if 'Set-Cookie' in headers:
+			cookies = headers['Set-Cookie']
 			
-		pageElement = HTML.ElementFromString(contents)
+		pageElement = HTML.ElementFromString(content)
+		postData 	= {}
 		
-		postData = {}
 		for item in pageElement.xpath("//*[@id = 'ChallengeForm']//input"):
+		
 			name = item.xpath("./@name")[0]
+		
 			if name in ['act', 'jschl_vc']:
 				value          = item.xpath("./@value")[0]
 				postData[name] = value
@@ -69,33 +68,29 @@ def UpdateCookiesForAuthentication(url):
 		for script in pageElement.xpath("//script[@type = 'text/javascript']"):			
 			if script.xpath("./text()") != []:
 				result = RE_MATH_EXPRESSION.search(script.xpath("./text()")[0]).groups()
+				
 				if len(result) > 0:
 					answer = int(result[0]) + (int(result[1]) * int(result[2])) + 16
 					postData['jschl_answer'] = str(answer)
 				
 		postURL = pageElement.xpath("//*[@id = 'ChallengeForm']/@action")[0]
-
+	
 		Thread.Sleep(5.850)
-
-		try:
-			noredir_opener = urllib2.build_opener(NoRedirect())
-			urllib2.install_opener(noredir_opener)
 		
-			req = urllib2.Request(url)
-			req.add_header('User-Agent', HTTP_USER_AGENT)
-			req.add_header('Cookie', HTTP.Headers['Cookie'])
-			req.add_header('Origin', url)
-			req.add_header('Referer', url)
-			req.add_header('Cache-Control', 'max-age=0')
-			req.add_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
-					
-			data = "act=" + postData['act'] + "&jschl_vc=" + postData['jschl_vc'] + "&jschl_answer=" + postData['jschl_answer']
-			resp = urllib2.urlopen(req, data = data)
+		try:
+			req = HTTP.Request(
+						postURL, 
+						values = postData,
+						headers = cookies,
+						follow_redirects = False
+			)
+			headers = req.headers
 			
-			HTTP.Headers['Cookie'] = resp.info()['Set-Cookie']
-
-		except urllib2.HTTPError, error:
-			HTTP.Headers['Cookie'] = error.info()['Set-Cookie']
+		except Ex.RedirectError, e:
+			headers = e.headers
+		
+		if 'Set-Cookie' in headers:
+			HTTP.Headers['Cookie'] = headers['Set-Cookie']
 	
 ##########################################################################################
 @handler('/video/roosterteeth', TITLE, thumb = ICON, art = ART)
