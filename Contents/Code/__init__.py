@@ -55,7 +55,7 @@ def UpdateCookiesForAuthentication(url):
 			cookies = headers['Set-Cookie']
 			
 		pageElement = HTML.ElementFromString(content)
-		postData 	= {}
+		postData    = {}
 		
 		for item in pageElement.xpath("//*[@id = 'ChallengeForm']//input"):
 		
@@ -126,7 +126,7 @@ def Shows(title, url, thumb):
 	showNames   = []
 	pageElement = HTML.ElementFromURL(url + '/archive/series.php')
 
-	for item in pageElement.xpath("//*[@id = 'seriesBoxTdTable']//a"):
+	for item in pageElement.xpath("//*[@class = 'content']//a"):
 		show = {}
 		try:
 			show["url"]  = item.xpath("./@href")[0]
