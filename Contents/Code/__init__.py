@@ -3,7 +3,7 @@ ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
 
 RE_ID              = Regex('(?<=id=)[0-9]+')
-RE_MATH_EXPRESSION = Regex('a\.val\(([0-9]+)\+([0-9]+)\*([0-9]+)\);')
+RE_MATH_EXPRESSION = Regex('a\.value *= *([0-9]+) *\+ *([0-9]+) *\* *([0-9]+)')
 
 ITEMS_PER_PAGE = 10
 
@@ -40,7 +40,7 @@ def UpdateCookiesForAuthentication(url):
 	needsUpdate = False
 
 	try:
-		req     = HTTP.Request(url)
+		req     = HTTP.Request(url, cacheTime = 0)
 		content = req.content
 		headers = req.headers
 		
@@ -57,38 +57,42 @@ def UpdateCookiesForAuthentication(url):
 		pageElement = HTML.ElementFromString(content)
 		postData    = {}
 		
-		for item in pageElement.xpath("//*[@id = 'ChallengeForm']//input"):
+		for item in pageElement.xpath("//*[@id = 'challenge-form']//input"):
 		
 			name = item.xpath("./@name")[0]
 		
-			if name in ['act', 'jschl_vc']:
+			if name in ['jschl_vc']:
 				value          = item.xpath("./@value")[0]
 				postData[name] = value
+
+		Log(postData)
 
 		for script in pageElement.xpath("//script[@type = 'text/javascript']"):			
 			if script.xpath("./text()") != []:
 				result = RE_MATH_EXPRESSION.search(script.xpath("./text()")[0]).groups()
-				
+				Log(result)
 				if len(result) > 0:
 					answer = int(result[0]) + (int(result[1]) * int(result[2])) + 16
 					postData['jschl_answer'] = str(answer)
 				
-		postURL = pageElement.xpath("//*[@id = 'ChallengeForm']/@action")[0]
+		ansURL = BASE_URL + pageElement.xpath("//*[@id = 'challenge-form']/@action")[0] + "?jschl_vc=" + postData['jschl_vc'] + "&jschl_answer=" + postData['jschl_answer']
 	
 		Thread.Sleep(5.850)
 		
 		try:
 			req = HTTP.Request(
-						postURL, 
-						values = postData,
+						ansURL, 
 						headers = cookies,
-						follow_redirects = False
+						follow_redirects = False,
+						cacheTime = 0
 			)
+			content = req.content
 			headers = req.headers
 			
 		except Ex.RedirectError, e:
 			headers = e.headers
 		
+		Log(headers)
 		if 'Set-Cookie' in headers:
 			HTTP.Headers['Cookie'] = headers['Set-Cookie']
 	
