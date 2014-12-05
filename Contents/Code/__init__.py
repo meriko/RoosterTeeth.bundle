@@ -240,7 +240,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
         if video["img"].startswith("//"):
             video["img"] = 'http:' + video["img"]
             
-        video["name"] = data['title']
+        video["name"] = String.DecodeHTMLEntities(data['title'])
             
         try:
             video["desc"] = HTML.ElementFromString(data['embed']['details']).xpath("//*[contains(@class, 'Description')]/text()")[0]
