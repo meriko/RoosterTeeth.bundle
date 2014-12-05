@@ -150,6 +150,10 @@ def Shows(title, url, thumb):
 
     sortedShows = sorted(shows, key=lambda show: show["name"])
     for show in sortedShows:
+
+        if show["name"] in ('RT Sponsor Cut'):
+            continue
+
         oc.add(
             DirectoryObject(
                 key = Callback(
@@ -240,7 +244,7 @@ def Videos(title, base_url, url, thumb, offset = 0):
         if video["img"].startswith("//"):
             video["img"] = 'http:' + video["img"]
             
-        video["name"] = data['title']
+        video["name"] = String.DecodeHTMLEntities(data['title'])
             
         try:
             video["desc"] = HTML.ElementFromString(data['embed']['details']).xpath("//*[contains(@class, 'Description')]/text()")[0]
