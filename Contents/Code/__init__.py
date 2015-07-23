@@ -45,6 +45,10 @@ def MainMenu():
     
     sortedShows = sorted(shows, key=lambda show: show["name"])
     for show in sortedShows:
+
+        if show["name"] in ('RT Sponsor Cut'):
+            continue
+
         oc.add(
             DirectoryObject(
                 key = Callback(
