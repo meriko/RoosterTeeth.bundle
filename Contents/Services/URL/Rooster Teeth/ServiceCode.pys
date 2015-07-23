@@ -1,0 +1,107 @@
+RE_ID = Regex("youtubeKey\: *\'(.+)\',")
+RE_HLS_URL = Regex("manifest\: *\'(.+)\',", Regex.MULTILINE)
+
+####################################################################################################
+def MetadataObjectForURL(url, **kwargs):
+
+    content = HTTP.Request(url, cacheTime = CACHE_1HOUR).content
+
+    try:
+        id = RE_ID.findall(content)[0]
+        embed_url = 'http://www.youtube.com/watch?v=%s' % id
+        
+        return URLService.MetadataObjectForURL(embed_url)
+        
+    except:
+        try:
+            element = HTML.ElementFromString(content)
+                        
+            title = element.xpath("//meta[@property='og:title']/@content")[0]
+            thumb = element.xpath("//meta[@property='og:image']/@content")[0]
+            
+            if thumb.startswith("//"):
+                thumb = 'http:' + thumb
+                
+            summary = element.xpath("//meta[@property='og:description']/@content")[0]
+            
+            return VideoClipObject(
+                title = title,
+                thumb = thumb,
+                summary = summary,
+                art = thumb
+            )
+        except:
+            raise Ex.MediaNotAvailable
+
+####################################################################################################
+@deferred
+def MediaObjectsForURL(url):
+
+    content = HTTP.Request(url, cacheTime = CACHE_1HOUR).content
+
+    try:
+        id = RE_ID.findall(content)[0]
+        embed_url = 'http://www.youtube.com/watch?v=%s' % id
+        
+        return URLService.MediaObjectsForURL(embed_url)
+
+    except:
+        try:
+            hls_url = RE_HLS_URL.findall(content)[0]
+            streams = GetHLSStreams(hls_url)
+            
+            return [
+                MediaObject(
+                    video_resolution = streams[0]['resolution'],
+                    audio_channels = 2,
+                    optimized_for_streaming = True,
+                    parts = [
+                        PartObject(
+                            key = HTTPLiveStreamURL(hls_url)
+                        )
+                    ]
+                )
+            ]
+
+        except:
+            raise Ex.MediaNotAvailable
+
+##########################################################################################
+def GetHLSStreams(url):
+    streams = []
+
+    try:
+        playList = HTTP.Request(url).content
+    except:
+        raise Ex.MediaNotAvailable
+
+    # Parse the m3u8 file to get:
+    # - URL
+    # - Resolution
+    # - Bitrate
+    for line in playList.splitlines():
+        if "BANDWIDTH" in line:
+            stream            = {}
+            stream["bitrate"] = int(Regex('(?<=BANDWIDTH=)[0-9]+').search(line).group(0))        
+
+            if "RESOLUTION" in line:
+                stream["resolution"] = int(Regex('(?<=RESOLUTION=)[0-9]+x[0-9]+').search(line).group(0).split("x")[1])
+
+            if not 'resolution' in stream:
+                stream["resolution"] = 0
+                
+        elif "m3u8" in line:
+            path = ''
+            
+            if not line.startswith("http"):
+                path = url[ : url.rfind('/') + 1]
+            
+            try:
+                stream["url"] = path + line    
+                streams.append(stream)
+            except:
+                pass
+                
+    sorted_streams = sorted(streams, key = lambda stream: stream["bitrate"], reverse = True)        
+
+    return sorted_streams
