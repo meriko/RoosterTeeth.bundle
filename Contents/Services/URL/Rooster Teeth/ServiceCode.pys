@@ -1,5 +1,5 @@
 RE_ID = Regex("youtubeKey\: *\'(.+)\',")
-RE_HLS_URL = Regex("manifest\: *\'(.+)\',", Regex.MULTILINE)
+RE_HLS_URL = Regex("file\: *'(.+\.m3u8)',", Regex.MULTILINE)
 
 ####################################################################################################
 def MetadataObjectForURL(url, **kwargs):
