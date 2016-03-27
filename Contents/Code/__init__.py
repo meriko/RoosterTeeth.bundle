@@ -19,6 +19,8 @@ def MainMenu():
 
     oc = ObjectContainer()
     
+    oc.add(PrefsObject(title = "Preferences"))
+    
     shows       = []
     showNames   = []
         
@@ -137,6 +139,7 @@ def Items(title, url, thumb, xpath_string, art, id=None):
 
     element = HTML.ElementFromURL(url)
     
+    episodes = []
     for item in element.xpath(xpath_string):
         if id:
             season_id = item.xpath(".//@id")[0]
@@ -170,7 +173,7 @@ def Items(title, url, thumb, xpath_string, art, id=None):
             except:
                 duration = None
             
-            oc.add(
+            episodes.append(
                 EpisodeObject(
                     url = url,
                     title = title,
@@ -181,6 +184,14 @@ def Items(title, url, thumb, xpath_string, art, id=None):
                     art = art
                 )
             )
-            
+    
+    if Prefs['sort'] == 'Latest First':
+        for episode in episodes:
+            oc.add(episode)   
+    else:
+        for episode in reversed(episodes):
+            oc.add(episode)
+        
     return oc
+    
 
