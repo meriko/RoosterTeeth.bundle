@@ -1,0 +1,9 @@
+[
+    {
+        "id": "sort",
+        "type": "enum",
+        "label": "Sort Videos By",
+        "values": ["Latest First", "Oldest First"],
+        "default": "Latest First"
+    }
+]
