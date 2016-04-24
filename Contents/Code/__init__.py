@@ -4,7 +4,6 @@ TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
 BASE_URL = 'http://roosterteeth.com'
-LOGIN_URL = 'http://roosterteeth.com/login'
 HTTP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/536.30.1 (KHTML, like Gecko) Version/6.0.5 Safari/536.30.1'
 
 CHANNELS = [
