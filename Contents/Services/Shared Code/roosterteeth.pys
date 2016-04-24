@@ -22,17 +22,23 @@ def Login():
     headers = {}
     headers['authority'] = 'roosterteeth.com'
     headers['referer'] = 'https://roosterteeth.com/login'
+    headers['Cookie'] = HTTP.GetCookiesForURL(LOGIN_URL)
+    
+    if headers['Cookie']:
+        Log('Cookies returned for initial login call')
+    else:
+        Log('No cookies in initial call')
        
-    content = HTTP.Request(url = LOGIN_URL, values = postData).content
+    response = HTTP.Request(url = LOGIN_URL, values = postData, headers = headers)
 
     Log('Successfully logged in?')
     
-    if Prefs['username'].lower() in content.lower():
+    if Prefs['username'].lower() in response.content.lower():
         Log('Username found in the login response!')
     else:
         Log('Username not found in the login response ...')
     
-    if 'Set-Cookie' in content.headers:
+    if 'Set-Cookie' in response.headers:
         Log('Found cookies for post data call')
         return content.headers['Set-Cookie']
     else:
