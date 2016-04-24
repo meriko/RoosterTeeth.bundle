@@ -1,8 +1,9 @@
 TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
-BASE_URL = "http://roosterteeth.com"
-HTTP_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/536.30.1 (KHTML, like Gecko) Version/6.0.5 Safari/536.30.1"
+BASE_URL = 'http://roosterteeth.com'
+LOGIN_URL = 'http://roosterteeth.com/login'
+HTTP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/536.30.1 (KHTML, like Gecko) Version/6.0.5 Safari/536.30.1'
 
 ##########################################################################################
 def Start():
@@ -12,6 +13,21 @@ def Start():
 
     HTTP.CacheTime  = CACHE_1HOUR
     HTTP.User_Agent = HTTP_USER_AGENT
+    
+    if Prefs['login'] and Prefs['username'] and Prefs['password']:
+        result = Login()
+
+###################################################################################################
+def ValidatePrefs():
+      
+    if Prefs['login'] and Prefs['username'] and Prefs['password']:
+        result = Login()
+        
+        if not result:
+            return ObjectContainer(
+                header = "Login failure",
+                message = "Please check your username and password"
+            )
     
 ##########################################################################################
 @handler('/video/roosterteeth', TITLE, thumb = ICON, art = ART)
@@ -49,7 +65,8 @@ def MainMenu():
     for show in sortedShows:
 
         if show["name"] in ('RT Sponsor Cut'):
-            continue
+            if not (Prefs['login'] and Prefs['username'] and Prefs['password']):
+                continue
 
         oc.add(
             DirectoryObject(
@@ -79,7 +96,8 @@ def Seasons(title, url, thumb):
     content = HTTP.Request(url).content
     
     if 'Sponsor Only Content' in content:
-        return ObjectContainer(header="Sorry", message="This show contains sponsor only content")
+        if not (Prefs['login'] and Prefs['username'] and Prefs['password']):
+            return ObjectContainer(header="Sponsor Only", message="This show contains sponsor only content.\r\nPlease login to access this show")
     
     element = HTML.ElementFromString(content)
     
@@ -194,4 +212,33 @@ def Items(title, url, thumb, xpath_string, art, id=None):
         
     return oc
     
+##########################################################################################
+def Login():
 
+    Log("Attempting to login")
+    
+    element = HTML.ElementFromURL(LOGIN_URL)
+    
+    try:
+        token = element.xpath("//*[@name='_token']/@value")[0]
+    except:
+        Log("Login failed, no token found!")
+        return False
+    
+    postData = {}
+    postData['_token'] = token
+    postData['username'] = Prefs['username']
+    postData['password'] = Prefs['password']
+
+    try:        
+        content = HTTP.Request(url = LOGIN_URL, values = postData).content
+        
+        if Prefs['username'] in content:
+            Log('Successfully logged in!')
+            return True
+        else:
+            Log('Login failed!')
+            return False            
+    except:
+        Log('Login failed!')
+        return False

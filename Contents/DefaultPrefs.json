@@ -5,5 +5,27 @@
         "label": "Sort Videos By",
         "values": ["Latest First", "Oldest First"],
         "default": "Latest First"
+    },
+    {
+        "id": "login",
+        "type": "bool",
+        "label": "Enable login",
+        "default": "false",
+        "secure": "true"
+    },
+    {
+        "id": "username",
+        "type": "text",
+        "label": "Username",
+        "default": "",
+        "secure": "true"
+    },
+    {
+        "id": "password",
+        "type": "text",
+        "option": "hidden",
+        "label": "Password",
+        "default": "",
+        "secure": "true"
     }
 ]
