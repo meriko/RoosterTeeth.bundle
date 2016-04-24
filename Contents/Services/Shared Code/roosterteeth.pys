@@ -1,4 +1,4 @@
-LOGIN_URL = 'http://roosterteeth.com/login'
+LOGIN_URL = 'https://roosterteeth.com/login'
 
 ##########################################################################################
 def Login():
@@ -17,18 +17,25 @@ def Login():
     postData['_token'] = token
     postData['username'] = Prefs['username']
     postData['password'] = Prefs['password']
+    postData['redirectTo'] = 'http%3A%2F%2Froosterteeth.com%2F'
+    
+    headers = {}
+    headers['authority'] = 'roosterteeth.com'
+    headers['referer'] = 'https://roosterteeth.com/login'
+       
+    content = HTTP.Request(url = LOGIN_URL, values = postData, headers = headers).content
 
-    try:        
-        content = HTTP.Request(url = LOGIN_URL, values = postData).content
+    Log('Successfully logged in?')
+    
+    if Prefs['username'].lower() in content.lower():
+        Log('Username found in the login response!')
+    else:
+        Log('Username not found in the login response ...')
+    
+    if 'Set-Cookie' in content.headers:
+        Log('Found cookies for post data call')
+        return content.headers['Set-Cookie']
+    else:
+        Log('No cookies found for post data call')
+        return None          
 
-        Log('Successfully logged in?')
-        
-        if Prefs['username'].lower() in content.lower():
-            Log('Username found in the login response!')
-        else:
-            Log('Username not found in the login response ...')
-        
-        return content.headers['Set-Cookie']           
-    except:
-        Log('Login failed!')
-        return None
