@@ -1,3 +1,5 @@
+Login = SharedCodeService.roosterteeth.Login
+
 TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
@@ -51,7 +53,12 @@ def ValidatePrefs():
     if Prefs['login'] and Prefs['username'] and Prefs['password']:
         result = Login()
         
-        if not result:
+        if result:
+            return ObjectContainer(
+                header = "Login success",
+                message = "You're now logged in!"
+            )
+        else:
             return ObjectContainer(
                 header = "Login failure",
                 message = "Please check your username and password"
@@ -256,34 +263,4 @@ def Items(title, url, thumb, xpath_string, art, id=None):
             oc.add(episode)
         
     return oc
-    
-##########################################################################################
-def Login():
 
-    Log("Attempting to login")
-    
-    element = HTML.ElementFromURL(LOGIN_URL)
-    
-    try:
-        token = element.xpath("//*[@name='_token']/@value")[0]
-    except:
-        Log("Login failed, no token found!")
-        return False
-    
-    postData = {}
-    postData['_token'] = token
-    postData['username'] = Prefs['username']
-    postData['password'] = Prefs['password']
-
-    try:        
-        content = HTTP.Request(url = LOGIN_URL, values = postData).content
-        
-        if Prefs['username'] in content:
-            Log('Successfully logged in!')
-            return True
-        else:
-            Log('Login failed!')
-            return False            
-    except:
-        Log('Login failed!')
-        return False

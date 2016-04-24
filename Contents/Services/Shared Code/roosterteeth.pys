@@ -1,0 +1,32 @@
+##########################################################################################
+def Login():
+
+    Log("Attempting to login ...")
+    
+    element = HTML.ElementFromURL(LOGIN_URL)
+    
+    try:
+        token = element.xpath("//*[@name='_token']/@value")[0]
+    except:
+        Log("Login failed, no token found!")
+        return None
+    
+    postData = {}
+    postData['_token'] = token
+    postData['username'] = Prefs['username']
+    postData['password'] = Prefs['password']
+
+    try:        
+        content = HTTP.Request(url = LOGIN_URL, values = postData).content
+
+        Log('Successfully logged in?')
+        
+        if Prefs['username'].lower() in content.lower():
+            Log('Username found in the login response!')
+        else:
+            Log('Username not found in the login response ...')
+        
+        return content.headers['Set-Cookie']           
+    except:
+        Log('Login failed!')
+        return None

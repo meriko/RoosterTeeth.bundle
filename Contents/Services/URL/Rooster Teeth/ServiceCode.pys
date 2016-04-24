@@ -1,10 +1,24 @@
+from roosterteeth import Login
+
 RE_ID = Regex("youtubeKey\: *\'(.+)\',")
 RE_HLS_URL = Regex("file\: *'(.+\.m3u8)',", Regex.MULTILINE)
 
 ####################################################################################################
 def MetadataObjectForURL(url, **kwargs):
 
-    content = HTTP.Request(url, cacheTime = CACHE_1HOUR).content
+    headers = {}
+
+    if Prefs['login'] and Prefs['username'] and Prefs['password']:
+        cookies = Login()
+        
+        if cookies:
+            headers['Cookie'] = cookies
+            Log('MDO: Got cookies!')
+        else:
+            Log('MDO: No cookies!')
+            
+
+    content = HTTP.Request(url, cacheTime = CACHE_1HOUR, headers = headers).content
 
     try:
         id = RE_ID.findall(content)[0]
@@ -37,7 +51,18 @@ def MetadataObjectForURL(url, **kwargs):
 @deferred
 def MediaObjectsForURL(url):
 
-    content = HTTP.Request(url, cacheTime = CACHE_1HOUR).content
+    headers = {}
+
+    if Prefs['login'] and Prefs['username'] and Prefs['password']:
+        cookies = Login()
+        
+        if cookies:
+            headers['Cookie'] = cookies
+            Log('MO: Got cookies!')
+        else:
+            Log('MO: No cookies!')
+
+    content = HTTP.Request(url, cacheTime = CACHE_1HOUR, headers = headers).content
 
     try:
         id = RE_ID.findall(content)[0]
