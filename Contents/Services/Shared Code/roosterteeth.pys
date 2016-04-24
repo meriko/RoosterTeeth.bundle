@@ -17,7 +17,6 @@ def Login():
     postData['_token'] = token
     postData['username'] = Prefs['username']
     postData['password'] = Prefs['password']
-    postData['redirectTo'] = 'http%3A%2F%2Froosterteeth.com%2F'
     
     headers = {}
     headers['authority'] = 'roosterteeth.com'
@@ -29,7 +28,16 @@ def Login():
     else:
         Log('No cookies in initial call')
        
-    response = HTTP.Request(url = LOGIN_URL, values = postData, headers = headers)
+    response = HTTP.Request(url = LOGIN_URL, values = postData, headers = headers, cacheTime = 0)
+    
+    try:
+        if response.content:
+            if Prefs['username'].lower() in response.content.lower():
+                Log('Username found in response')
+            else:
+                Log('Username NOT found in response')
+    except:
+        Log('Exception trying to access response.content')
 
     Log('Successfully logged in?')
     
