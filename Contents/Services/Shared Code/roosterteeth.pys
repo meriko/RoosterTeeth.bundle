@@ -5,7 +5,7 @@ def Login():
 
     Log("Attempting to login ...")
     
-    element = HTML.ElementFromURL(LOGIN_URL)
+    element = HTML.ElementFromURL(url = LOGIN_URL, cacheTime = 0)
     
     try:
         token = element.xpath("//*[@name='_token']/@value")[0]
