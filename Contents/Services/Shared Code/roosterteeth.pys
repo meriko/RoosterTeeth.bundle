@@ -33,11 +33,6 @@ def Login():
 
     Log('Successfully logged in?')
     
-    if Prefs['username'].lower() in response.content.lower():
-        Log('Username found in the login response!')
-    else:
-        Log('Username not found in the login response ...')
-    
     if 'Set-Cookie' in response.headers:
         Log('Found cookies for post data call')
         return content.headers['Set-Cookie']
