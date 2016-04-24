@@ -23,7 +23,7 @@ def Login():
     headers['authority'] = 'roosterteeth.com'
     headers['referer'] = 'https://roosterteeth.com/login'
        
-    content = HTTP.Request(url = LOGIN_URL, values = postData, headers = headers).content
+    content = HTTP.Request(url = LOGIN_URL, values = postData).content
 
     Log('Successfully logged in?')
     
