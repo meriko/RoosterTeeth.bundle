@@ -5,6 +5,34 @@ BASE_URL = 'http://roosterteeth.com'
 LOGIN_URL = 'http://roosterteeth.com/login'
 HTTP_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/536.30.1 (KHTML, like Gecko) Version/6.0.5 Safari/536.30.1'
 
+CHANNELS = [
+    {
+        'title': 'Rooster Teeth',
+        'url': 'http://roosterteeth.com/show',
+        'image': 'http://roosterteeth.com/images/logo-rt.png'
+    },
+    {
+        'title': 'Achievement Hunter',
+        'url': 'http://achievementhunter.com/show',
+        'image': 'http://achievementhunter.com/images/logo-ah.png'
+    },
+    {
+        'title': 'Funhaus',
+        'url': 'http://fun.haus/show',
+        'image': 'http://fun.haus/images/logo-fh.png'
+    },
+    {
+        'title': 'ScrewAttack',
+        'url': 'http://screwattack.com/show',
+        'image': 'http://screwattack.com/images/logo-sa.png'
+    },
+    {
+        'title': 'The Know',
+        'url': 'http://theknow.tv/show',
+        'image': 'http://theknow.tv/images/logo-tk.png'
+    }
+]
+
 ##########################################################################################
 def Start():
     # Setup the default attributes for the ObjectContainer
@@ -28,7 +56,7 @@ def ValidatePrefs():
                 header = "Login failure",
                 message = "Please check your username and password"
             )
-    
+
 ##########################################################################################
 @handler('/video/roosterteeth', TITLE, thumb = ICON, art = ART)
 def MainMenu():
@@ -37,11 +65,28 @@ def MainMenu():
     
     oc.add(PrefsObject(title = "Preferences"))
     
+    for channel in CHANNELS:
+        oc.add(
+            DirectoryObject(
+                key = Callback(Shows, url=channel['url'], title=channel['title']),
+                title = channel['title'],
+                thumb = channel['image']
+            )
+        )
+        
+    return oc
+    
+##########################################################################################
+@route('/video/roosterteeth/shows', TITLE, thumb = ICON, art = ART)
+def Shows(url, title):
+
+    oc = ObjectContainer(title2=title)
+
     shows       = []
     showNames   = []
         
     # Add shows by parsing the site
-    element = HTML.ElementFromURL('http://roosterteeth.com/show')
+    element = HTML.ElementFromURL(url)
 
     for item in element.xpath("//*[@class = 'square-blocks']//a"):
         show = {}
