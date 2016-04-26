@@ -42,9 +42,6 @@ def Start():
 
     HTTP.CacheTime  = CACHE_1HOUR
     HTTP.User_Agent = HTTP_USER_AGENT
-    
-    if Prefs['login'] and Prefs['username'] and Prefs['password']:
-        result = Login()
 
 ###################################################################################################
 def ValidatePrefs():

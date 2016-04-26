@@ -13,38 +13,20 @@ def Login():
         Log("Login failed, no token found!")
         return None
     
-    postData = {}
-    postData['_token'] = token
-    postData['username'] = Prefs['username']
-    postData['password'] = Prefs['password']
-    
-    headers = {}
-    headers['authority'] = 'roosterteeth.com'
-    headers['referer'] = 'https://roosterteeth.com/login'
-    headers['Cookie'] = HTTP.GetCookiesForURL(LOGIN_URL)
-    
-    if headers['Cookie']:
-        Log('Cookies returned for initial login call')
-    else:
-        Log('No cookies in initial call')
-       
-    response = HTTP.Request(url = LOGIN_URL, values = postData, headers = headers, cacheTime = 0)
+    post_data = {}
+    post_data['_token'] = token
+    post_data['username'] = Prefs['username']
+    post_data['password'] = Prefs['password']
     
     try:
-        if response.content:
-            if Prefs['username'].lower() in response.content.lower():
-                Log('Username found in response')
-            else:
-                Log('Username NOT found in response')
+        response = HTTP.Request(url = LOGIN_URL, values = post_data, cacheTime = 0, follow_redirects = False)
+    except Ex.RedirectError, e:
+        if 'Set-Cookie' in e.headers:
+            Log('Found cookies for post data call')
+            return e.headers['Set-Cookie']
+        else:
+            Log('No cookies found for post data call')
+            return None        
     except:
-        Log('Exception trying to access response.content')
-
-    Log('Successfully logged in?')
-    
-    if 'Set-Cookie' in response.headers:
-        Log('Found cookies for post data call')
-        return content.headers['Set-Cookie']
-    else:
-        Log('No cookies found for post data call')
-        return None          
-
+        Log('HTTP exception in Login')
+        return None
