@@ -8,11 +8,7 @@
 		<dict>
 			<key>URLPatterns</key>
 			<array>
-				<string>http://roosterteeth.com/episode/.+</string>
-				<string>http://achievementhunter.com/episode/.+</string>
-				<string>http://fun.haus/episode/.+</string>
-				<string>http://screwattack.com/episode/.+</string>
-				<string>http://theknow.tv/episode/.+</string>
+				<string>http:\/\/.*\.?roosterteeth\.com\/episode\/.+</string>
 			</array>
 		</dict>
 	</dict>

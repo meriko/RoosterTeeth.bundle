@@ -13,10 +13,6 @@ def MetadataObjectForURL(url, **kwargs):
         
         if cookies:
             headers['Cookie'] = cookies
-            Log('MDO: Got cookies!')
-        else:
-            Log('MDO: No cookies!')
-            
 
     content = HTTP.Request(url, cacheTime = CACHE_1HOUR, headers = headers).content
 
@@ -58,9 +54,6 @@ def MediaObjectsForURL(url):
         
         if cookies:
             headers['Cookie'] = cookies
-            Log('MO: Got cookies!')
-        else:
-            Log('MO: No cookies!')
 
     content = HTTP.Request(url, cacheTime = CACHE_1HOUR, headers = headers).content
 
