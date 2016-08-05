@@ -19,7 +19,7 @@ CHANNELS = [
     },
     {
         'title': 'Funhaus',
-        'url': 'http://funhaus.roosterteeth/show',
+        'url': 'http://funhaus.roosterteeth.com/show',
         'image': 'http://funhaus.roosterteeth.com/images/logo-fh.png'
     },
     {
