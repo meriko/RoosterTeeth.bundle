@@ -14,23 +14,28 @@ CHANNELS = [
     },
     {
         'title': 'Achievement Hunter',
-        'url': 'http://achievementhunter.com/show',
-        'image': 'http://achievementhunter.com/images/logo-ah.png'
+        'url': 'http://achievementhunter.roosterteeth.com/show',
+        'image': 'http://achievementhunter.roosterteeth.com/images/logo-ah.png'
     },
     {
         'title': 'Funhaus',
-        'url': 'http://fun.haus/show',
-        'image': 'http://fun.haus/images/logo-fh.png'
+        'url': 'http://funhaus.roosterteeth/show',
+        'image': 'http://funhaus.roosterteeth.com/images/logo-fh.png'
     },
     {
         'title': 'ScrewAttack',
-        'url': 'http://screwattack.com/show',
-        'image': 'http://screwattack.com/images/logo-sa.png'
+        'url': 'http://screwattack.roosterteeth.com/show',
+        'image': 'http://screwattack.roosterteeth.com/images/logo-sa.png'
     },
     {
         'title': 'The Know',
-        'url': 'http://theknow.tv/show',
-        'image': 'http://theknow.tv/images/logo-tk.png'
+        'url': 'http://theknow.roosterteeth.com/show',
+        'image': 'http://theknow.roosterteeth.com/images/logo-tk.png'
+    },
+    {
+        'title': 'CowChop',
+        'url': 'http://cowchop.roosterteeth.com/show',
+        'image': 'http://cowchop.roosterteeth.com/images/logo-cc.png'
     }
 ]
 
