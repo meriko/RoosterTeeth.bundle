@@ -10,32 +10,32 @@ CHANNELS = [
     {
         'title': 'Rooster Teeth',
         'url': 'http://roosterteeth.com/show',
-        'image': 'http://roosterteeth.com/images/logo-rt.png'
+        'image': 'https://pbs.twimg.com/profile_images/699276126644936704/rCkvY0SS_400x400.jpg'
     },
     {
         'title': 'Achievement Hunter',
         'url': 'http://achievementhunter.roosterteeth.com/show',
-        'image': 'http://achievementhunter.roosterteeth.com/images/logo-ah.png'
+        'image': 'https://pbs.twimg.com/profile_images/1834741417/283025_10150250994985698_268895495697_7664630_357027_n_400x400.jpg'
     },
     {
         'title': 'Funhaus',
         'url': 'http://funhaus.roosterteeth.com/show',
-        'image': 'http://funhaus.roosterteeth.com/images/logo-fh.png'
+        'image': 'https://pbs.twimg.com/profile_images/563456577076596737/kTHggklU_400x400.png'
     },
     {
         'title': 'ScrewAttack',
         'url': 'http://screwattack.roosterteeth.com/show',
-        'image': 'http://screwattack.roosterteeth.com/images/logo-sa.png'
+        'image': 'https://pbs.twimg.com/profile_images/735516290773704704/gJZmqxDZ_400x400.jpg'
     },
     {
         'title': 'The Know',
         'url': 'http://theknow.roosterteeth.com/show',
-        'image': 'http://theknow.roosterteeth.com/images/logo-tk.png'
+        'image': 'https://pbs.twimg.com/profile_images/639837776934891520/WA-rAvdP_400x400.png'
     },
     {
         'title': 'CowChop',
         'url': 'http://cowchop.roosterteeth.com/show',
-        'image': 'http://cowchop.roosterteeth.com/images/logo-cc.png'
+        'image': 'https://pbs.twimg.com/profile_images/671530901734473728/CfowRP9t_400x400.png'
     }
 ]
 
