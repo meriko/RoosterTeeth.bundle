@@ -85,7 +85,7 @@ def MainMenu():
     return oc
     
 ##########################################################################################
-@route('/video/roosterteeth/shows', TITLE, thumb = ICON, art = ART)
+@route('/video/roosterteeth/Shows', TITLE, thumb = ICON, art = ART)
 def Shows(url, title):
 
     oc = ObjectContainer(title2=title)
@@ -146,41 +146,7 @@ def Shows(url, title):
 def EpisodeCategories(title, url, thumb):
 
     oc = ObjectContainer(title2=title)
-        
-    oc.add(
-        DirectoryObject(
-            key = Callback(
-                Recents, 
-                title = "Recently Added Videos",
-                url = url,
-                thumb = thumb,
-                xpath_string = "//*[@id='tab-content-trending']//*[@class='episodes--recent']"
-            ), 
-            title = "Recently Added Videos",
-            thumb = thumb
-        )
-    )
 
-    oc.add(
-        DirectoryObject(
-            key = Callback(
-                Seasons, 
-                title = title,
-                url = url, 
-                thumb = thumb
-            ), 
-            title = "Seasons",
-            thumb = thumb
-        )
-    )
-
-    return oc
-
-##########################################################################################
-@route("/video/roosterteeth/Seasons")
-def Seasons(title, url, thumb):
-    oc = ObjectContainer(title2="Seasons")
-    
     content = HTTP.Request(url).content
     
     if 'Sponsor Only Content' in content:
@@ -197,6 +163,25 @@ def Seasons(title, url, thumb):
     except:
         art = None
     
+    for category in [{'title': 'Recently Added Videos', 'xpath': "//*[@id='tab-content-trending']//*[@class='episodes--recent']"}, {'title': 'All Time Favorites', 'xpath': "//*[@id='tab-content-trending']//*[@class='episodes--all-time-favs']"}]:
+        oc.add(
+            DirectoryObject(
+                key = Callback(
+                    Items, 
+                    title = category['title'],
+                    url = url,
+                    thumb = thumb,
+                    xpath_string = category['xpath'],
+                    art = art,
+                    recent = 'recent' in category['xpath']
+                ), 
+                title = category['title'],
+                thumb = thumb,
+                art = art
+            )
+        )
+    
+    # Fetch seasons    
     for item in element.xpath("//*[@id='tab-content-episodes']//*[@class='accordion']//label"):
         id = item.xpath("./@for")[0]
         
@@ -227,79 +212,29 @@ def Seasons(title, url, thumb):
             )
         )
 
-    if len(oc) < 1:
-        return Items(
-            title = title,
-            url = url,
-            thumb = thumb,
-            xpath_string = "//*[@id='tab-content-episodes']",
-            art = art
-        )
-    else:
-        return oc
-
-##########################################################################################
-@route("/video/roosterteeth/Recents")
-def Recents(title, url, thumb, xpath_string):
-    oc = ObjectContainer(title2=title)
-
-    element = HTML.ElementFromURL(url)
-
-    try:
-        art = element.xpath("//*[@class='cover-image']/@style")[0].split("(")[1].split(")")[0]
-        
-        if art.startswith("//"):
-            art = 'http:' + art 
-    except:
-        art = None
-    
-    episodes = []
-    for item in element.xpath(xpath_string):
-        
-        for episode in item.xpath(".//*[@class='episode-blocks']//li"):
-            url = episode.xpath(".//@href")[0]
-            title = episode.xpath(".//*[@class='name']/text()")[0]
-            thumb = episode.xpath(".//img/@src")[0]
-            
-            if thumb.startswith("//"):
-                thumb = 'http:' + thumb
-                
-            try:
-                index = int(title.split(" ")[1])
-            except:
-                index = None
-                
-            try:
-                duration_string = episode.xpath(".//*[@class='timestamp']/text()")[0].strip()
-                duration = ((int(duration_string.split(":")[0])*60) + int(duration_string.split(":")[1])) * 1000
-            except:
-                duration = None
-            
-            episodes.append(
-                EpisodeObject(
-                    url = url,
+    if len(oc) == 2:
+        title = 'Episodes'
+        oc.add(
+            DirectoryObject(
+                key = Callback(
+                    Items, 
                     title = title,
+                    url = url,
                     thumb = thumb,
-                    index = index,
-                    duration = duration,
+                    xpath_string = "//*[@id='tab-content-episodes']",
                     art = art
-                )
+                ), 
+                title = title,
+                thumb = thumb,
+                art = art
             )
+        )
     
-    if Prefs['sort'] == 'Latest First':
-        for episode in episodes:
-            oc.add(episode)   
-    else:
-        for episode in reversed(episodes):
-            oc.add(episode)
-        
     return oc
 
-
-
 ##########################################################################################
-@route("/video/roosterteeth/Items")
-def Items(title, url, thumb, xpath_string, art, id=None):
+@route("/video/roosterteeth/Items",  recent = bool)
+def Items(title, url, thumb, xpath_string, art, id=None, recent=False):
     oc = ObjectContainer(title2=title)
 
     element = HTML.ElementFromURL(url)
@@ -350,12 +285,18 @@ def Items(title, url, thumb, xpath_string, art, id=None):
                 )
             )
     
-    if Prefs['sort'] == 'Latest First':
+    if Prefs['sort'] == 'Latest First' or recent:
         for episode in episodes:
             oc.add(episode)   
     else:
         for episode in reversed(episodes):
             oc.add(episode)
+    
+    if len(oc) < 1:
+        return ObjectContainer(
+            header = "Sorry",
+            message = "Couldn't find any videos for this show"
+        )
         
     return oc
 
