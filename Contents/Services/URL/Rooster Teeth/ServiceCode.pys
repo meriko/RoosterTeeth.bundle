@@ -9,12 +9,12 @@ def MetadataObjectForURL(url, **kwargs):
     headers = {}
 
     if Prefs['login'] and Prefs['username'] and Prefs['password']:
-        cookies = Login()
+        cookies = Login(url)
         
         if cookies:
             headers['Cookie'] = cookies
 
-    content = HTTP.Request(url, cacheTime = CACHE_1HOUR, headers = headers).content
+    content = HTTP.Request(url, cacheTime = 10, headers = headers).content
 
     try:
         id = RE_ID.findall(content)[0]
@@ -50,12 +50,12 @@ def MediaObjectsForURL(url):
     headers = {}
 
     if Prefs['login'] and Prefs['username'] and Prefs['password']:
-        cookies = Login()
+        cookies = Login(url)
         
         if cookies:
             headers['Cookie'] = cookies
 
-    content = HTTP.Request(url, cacheTime = CACHE_1HOUR, headers = headers).content
+    content = HTTP.Request(url, cacheTime = 10, headers = headers).content
 
     try:
         id = RE_ID.findall(content)[0]
