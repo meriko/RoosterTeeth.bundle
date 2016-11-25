@@ -71,7 +71,7 @@ def MainMenu():
     return oc
     
 ##########################################################################################
-@route('/video/roosterteeth/Shows', TITLE, thumb = ICON, art = ART)
+@route('/video/roosterteeth/Shows')
 def Shows(url, title):
 
     oc = ObjectContainer(title2=title)
