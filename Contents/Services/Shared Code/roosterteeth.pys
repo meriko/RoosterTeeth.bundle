@@ -1,11 +1,26 @@
-LOGIN_URL = 'https://roosterteeth.com/login'
-
 ##########################################################################################
-def Login():
+def Login(url):
 
     Log("Attempting to login ...")
     
-    element = HTML.ElementFromURL(url = LOGIN_URL, cacheTime = 0)
+    login_url = 'https://roosterteeth.com/login'
+    if 'achievementhunter' in url:
+        login_url = 'https://achievementhunter.com/login'
+    elif 'funhaus' in url:
+        login_url = 'https://funhaus.com/login'
+    elif 'screwattack' in url:
+        login_url = 'https://screwattack.com/login'
+    elif 'gameattack' in url:
+        login_url = 'https://gameattack.com/login'
+    elif 'theknow' in url:
+        login_url = 'https://theknow.com/login'
+    elif 'cowchop' in url:
+        login_url = 'https://cowchop.com/login'
+    else:
+        Log("Failed: Unknown url: %s" % url)
+        return None
+    
+    element = HTML.ElementFromURL(url = login_url, cacheTime = 0)
     
     try:
         token = element.xpath("//*[@name='_token']/@value")[0]
@@ -19,7 +34,7 @@ def Login():
     post_data['password'] = Prefs['password']
     
     try:
-        response = HTTP.Request(url = LOGIN_URL, values = post_data, cacheTime = 0, follow_redirects = False)
+        response = HTTP.Request(url = login_url, values = post_data, cacheTime = 0, follow_redirects = False)
     except Ex.RedirectError, e:
         if 'Set-Cookie' in e.headers:
             Log('Found cookies for post data call')

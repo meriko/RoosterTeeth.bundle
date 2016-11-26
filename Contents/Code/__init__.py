@@ -1,5 +1,3 @@
-Login = SharedCodeService.roosterteeth.Login
-
 TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
@@ -28,12 +26,17 @@ CHANNELS = [
         'image': 'https://pbs.twimg.com/profile_images/735516290773704704/gJZmqxDZ_400x400.jpg'
     },
     {
+        'title': 'Game Attack',
+        'url': 'http://gameattack.roosterteeth.com/show',
+        'image': 'https://pbs.twimg.com/profile_images/783404372323475456/A3XK5iD7_400x400.jpg'
+    },
+    {
         'title': 'The Know',
         'url': 'http://theknow.roosterteeth.com/show',
         'image': 'https://pbs.twimg.com/profile_images/639837776934891520/WA-rAvdP_400x400.png'
     },
     {
-        'title': 'CowChop',
+        'title': 'Cow Chop',
         'url': 'http://cowchop.roosterteeth.com/show',
         'image': 'https://pbs.twimg.com/profile_images/671530901734473728/CfowRP9t_400x400.png'
     }
@@ -47,23 +50,6 @@ def Start():
 
     HTTP.CacheTime  = CACHE_1HOUR
     HTTP.User_Agent = HTTP_USER_AGENT
-
-###################################################################################################
-def ValidatePrefs():
-      
-    if Prefs['login'] and Prefs['username'] and Prefs['password']:
-        result = Login()
-        
-        if result:
-            return ObjectContainer(
-                header = "Login success",
-                message = "You're now logged in!"
-            )
-        else:
-            return ObjectContainer(
-                header = "Login failure",
-                message = "Please check your username and password"
-            )
 
 ##########################################################################################
 @handler('/video/roosterteeth', TITLE, thumb = ICON, art = ART)
@@ -163,7 +149,8 @@ def EpisodeCategories(title, url, thumb):
     except:
         art = None
     
-    for category in [{'title': 'Recently Added Videos', 'xpath': "//*[@id='tab-content-trending']//*[@class='episodes--recent']"}, {'title': 'All Time Favorites', 'xpath': "//*[@id='tab-content-trending']//*[@class='episodes--all-time-favs']"}]:
+    '''
+    for category in [{'title': 'Recently Added Videos', 'xpath': "//*[@id='tab-content-trending']//*[@class='episodes--recent']//*[@id='recent-carousel-comment']//text()"}, {'title': 'All Time Favorites', 'xpath': "//*[@id='tab-content-trending']//*[@class='episodes--all-time-favs']"}]:
         oc.add(
             DirectoryObject(
                 key = Callback(
@@ -180,6 +167,7 @@ def EpisodeCategories(title, url, thumb):
                 art = art
             )
         )
+    '''
     
     # Fetch seasons    
     for item in element.xpath("//*[@id='tab-content-episodes']//*[@class='accordion']//label"):
@@ -212,7 +200,7 @@ def EpisodeCategories(title, url, thumb):
             )
         )
 
-    if len(oc) == 2:
+    if len(oc) > 0:
         title = 'Episodes'
         oc.add(
             DirectoryObject(
@@ -230,7 +218,16 @@ def EpisodeCategories(title, url, thumb):
             )
         )
     
-    return oc
+        return oc
+        
+    else:
+        return Items(
+            title = title,
+            url = url,
+            thumb = thumb,
+            xpath_string = "//*[@id='tab-content-episodes']",
+            art = art
+        )
 
 ##########################################################################################
 @route("/video/roosterteeth/Items",  recent = bool)
@@ -254,14 +251,25 @@ def Items(title, url, thumb, xpath_string, art, id=None, recent=False):
         else:
             season = None
         
-        for episode in item.xpath(".//*[@class='episode-blocks']//li"):
-            url = episode.xpath(".//@href")[0]
-            title = episode.xpath(".//*[@class='name']/text()")[0]
+        for episode in item.xpath(".//*[@class='grid-blocks']//li"):
+            try:
+                url = episode.xpath(".//@href")[0]
+                
+                if not '/episode/' in url:
+                    continue
+            except:
+                continue
+            
+            try:
+                title = episode.xpath(".//*[@class='name']/text()")[0]
+            except:
+                continue
+            
             thumb = episode.xpath(".//img/@src")[0]
             
             if thumb.startswith("//"):
                 thumb = 'http:' + thumb
-                
+            
             try:
                 index = int(title.split(" ")[1])
             except:
@@ -284,7 +292,7 @@ def Items(title, url, thumb, xpath_string, art, id=None, recent=False):
                     art = art
                 )
             )
-    
+
     if Prefs['sort'] == 'Latest First' or recent:
         for episode in episodes:
             oc.add(episode)   
