@@ -1,3 +1,5 @@
+Login = SharedCodeService.roosterteeth.Login
+
 TITLE = 'Rooster Teeth'
 ART   = 'art-default.jpg'
 ICON  = 'icon-default.png'
