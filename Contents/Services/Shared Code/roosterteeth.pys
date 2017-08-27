@@ -1,10 +1,11 @@
 ##########################################################################################
-def Login(url):
+def Login(url='https://roosterteeth.com/login'):
 
     Log("Attempting to login ...")
     
-    login_url = 'https://roosterteeth.com/login'
-    if 'achievementhunter' in url:
+    if 'roosterteeth' in url:
+        login_url = 'https://roosterteeth.com/login'
+    elif 'achievementhunter' in url:
         login_url = 'https://achievementhunter.com/login'
     elif 'funhaus' in url:
         login_url = 'https://funhaus.com/login'
